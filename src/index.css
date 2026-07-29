@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body { background: #0a1f0f; color: #e8f5ee; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(74,158,107,0.25); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(74,158,107,0.45); }
+
+/* Organic particle background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(74,158,107,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 80% 20%, rgba(45,90,61,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 30% at 50% 110%, rgba(74,158,107,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root { position: relative; z-index: 1; }
+
+/* Leaf SVG watermark */
+.leaf-bg {
+  position: fixed;
+  bottom: -80px;
+  right: -60px;
+  width: 400px;
+  height: 400px;
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Animations */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse-leaf { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-pulse { animation: pulse-leaf 2s ease-in-out infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* Focus */
+input:focus, textarea:focus, select:focus { outline: none; }
+
+/* Transitions */
+* { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }

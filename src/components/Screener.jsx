@@ -26,7 +26,7 @@ function CriteriaChecker({ criteria }) {
           return (
             <div key={key} className="flex items-start gap-2.5">
               <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: c.pass ? `${GD}0.15)` : 'rgba(239,68,68,0.15)', border: `1px solid ${c.pass ? `${GD}0.4)` : 'rgba(239,68,68,0.4)'}` }}>
+                className={c.pass ? 'bg-gold/15 border border-gold/40' : 'bg-red-500/15 border border-red-500/40'}>
                 <span className="text-[8px]" style={{ color: c.pass ? G : '#ef4444' }}>{c.pass ? '✓' : '✗'}</span>
               </div>
               <div className="flex-1 min-w-0">
@@ -500,7 +500,7 @@ function TabExport({ m }) {
         </div>
         <button onClick={() => exportPDF(m)}
           className="flex-shrink-0 px-4 py-2 rounded-lg font-bold text-sm transition-colors"
-          style={{ background: G, color: '#0a1f0f' }}>
+          className="bg-gold text-navy">
           Export PDF
         </button>
       </div>
@@ -524,7 +524,7 @@ function MemoOutput({ memo, user, saved, setSaved, refreshDeals, onSaveToTracker
         {tabs.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
             className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all duration-150"
-            style={activeTab === t.id ? { background: G, color: '#0a1f0f' } : { color: 'rgba(232,245,238,0.4)' }}>
+            className={activeTab === t.id ? 'bg-gold text-navy' : 'text-white/40 hover:text-white/70'}>
             {t.label}
             {t.id === 'icprep' && (memo.red_flags||[]).length > 0 && (
               <span className="ml-1 text-[8px] text-white rounded-full px-1" style={{ background: '#ef4444' }}>{memo.red_flags.length}</span>
@@ -685,9 +685,9 @@ export default function Screener({ user, apiKey, tvKey, slackHook, deals, refres
 
             <button onClick={generate} disabled={loading || (!name && !deckB64)}
               className="w-full flex items-center justify-center gap-2 rounded-xl py-3 font-bold text-sm transition-colors disabled:opacity-40 disabled:cursor-wait"
-              style={{ background: loading || (!name && !deckB64) ? 'rgba(74,158,107,0.3)' : G, color: '#0a1f0f' }}>
+              className="bg-gold text-navy disabled:opacity-40">
               {loading && <div className="w-4 h-4 border-2 border-[#0a1f0f] border-t-transparent rounded-full animate-spin"/>}
-              {loading ? loadStep || 'Generating…' : '🌱 Generate GIGF Impact Memo'}
+              {loading ? loadStep || 'Generating…' : 'Generate GIGF Impact Memo'}
             </button>
 
             {error && <div className="rounded-lg px-3 py-2.5 text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444' }}>{error}</div>}

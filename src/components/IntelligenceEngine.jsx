@@ -101,7 +101,7 @@ const GitHubRadar = ({ apiKey }) => {
     setResults([]);
 
     try {
-      setLoadingStep('Fetching RegTech + AI repos…');
+      setLoadingStep('Fetching cleantech + impact repos…');
       const headers = { Accept: 'application/vnd.github+json' };
 
       const [res1, res2] = await Promise.all([
@@ -137,8 +137,8 @@ const GitHubRadar = ({ apiKey }) => {
       for (let i = 0; i < Math.min(filtered.length, 12); i++) {
         const repo = filtered[i];
         const system =
-          'You are a VC analyst at BlackFin Tech, a European FinTech/RegTech/InsurTech specialist fund. Respond ONLY with a valid JSON object, no markdown, no preamble.';
-        const prompt = `Is this GitHub repo early-stage work fitting BlackFin VC thesis? (AI-native B2B FinTech/RegTech/InsurTech, EU market, Series A-B potential).
+          'You are a VC analyst at Meridiam GIGF, a European ecological transition growth equity fund (Article 9 SFDR). Respond ONLY with a valid JSON object, no markdown, no preamble.';
+        const prompt = `Is this GitHub repo early-stage work fitting BlackFin VC thesis? (EU ecological transition: clean mobility, low-carbon economy, smart cities, circular economy, agrotech. Series B/C, >15% growth, Article 9 SFDR eligible).
 
 Repo:
 - Name: ${repo.full_name}
@@ -203,7 +203,7 @@ Output JSON exactly:
           <EmptyState
             icon="⬡"
             title="No repos scanned yet"
-            subtitle="Click Scan GitHub to discover early-stage FinTech & RegTech projects"
+            subtitle="Click Scan GitHub to discover early-stage cleantech & impact projects"
           />
         )}
         {!loading &&
@@ -265,11 +265,11 @@ const CompetitorFundTracker = ({ apiKey, tvKey }) => {
   const [error, setError] = useState(null);
 
   const FUND_QUERIES = [
-    { fund: 'Accel', query: 'Accel portfolio investment fintech regtech insurtech 2026' },
-    { fund: 'Index Ventures', query: 'Index Ventures portfolio fintech AI investment 2026' },
-    { fund: 'Balderton Capital', query: 'Balderton Capital fintech investment 2026' },
-    { fund: 'Notion Capital', query: 'Notion Capital portfolio fintech 2026' },
-    { fund: 'Partech', query: 'Partech portfolio fintech regtech 2026' },
+    { fund: 'Demeter Partners', query: 'Demeter Partners portfolio cleantech climate investment 2026' },
+    { fund: 'Eurazeo Smart City', query: 'Eurazeo Smart City portfolio investment 2026' },
+    { fund: 'Bpifrance Large Venture', query: 'Bpifrance Large Venture cleantech ecological transition 2026' },
+    { fund: 'Astanor Ventures', query: 'Astanor Ventures agrifood impact investment 2026' },
+    { fund: 'SWEN Capital', query: 'SWEN Capital impact private equity 2026' },
   ];
 
   const signalStyle = (signal) => {
@@ -297,17 +297,17 @@ const CompetitorFundTracker = ({ apiKey, tvKey }) => {
 
           const system =
             'You are a VC intelligence analyst. Respond ONLY with valid JSON, no markdown, no preamble.';
-          const prompt = `Analyse ${fund}'s recent investment activity in FinTech/RegTech/InsurTech for 2026.
+          const prompt = `Analyse ${fund}'s recent investment activity in ecological transition (cleantech, climate, clean mobility, circular economy) for 2026.
 
 News snippets:
 ${snippets || 'No recent news found.'}
 
-BlackFin Tech focuses on: AI-native B2B FinTech, RegTech, InsurTech, EU market.
+GIGF focuses on: clean mobility, low-carbon economy, smart cities, circular economy, agrotech. Europe only, Series B/C, >15% growth, Article 9 SFDR.
 
 Output JSON exactly:
 {"fund":"${fund}","recent_sectors":["string"],"crowd_sectors":["string"],"opportunity_sectors":["string"],"signal":"CROWDING"|"OPPORTUNITY"|"NEUTRAL","implication":"string"}
 
-Rules: crowd_sectors = sectors with 3+ investments by this fund this year. opportunity_sectors = BlackFin thesis sectors this fund has NOT invested in. signal = CROWDING if they're flooding a BlackFin sector, OPPORTUNITY if they've left a gap, NEUTRAL otherwise.`;
+Rules: crowd_sectors = ecological transition sub-sectors with 3+ investments by this fund. opportunity_sectors = GIGF thesis sectors this fund has NOT invested in. signal = CROWDING if flooding a GIGF sector, OPPORTUNITY if they left a gap, NEUTRAL otherwise.`;
 
           try {
             const raw = await claudeAPI(system, prompt, apiKey);
@@ -420,8 +420,8 @@ const RegulatoryEngine = ({ apiKey, tvKey }) => {
 
   const REG_QUERIES = [
     { reg: 'EU AI Act', query: 'EU AI Act enforcement August 2026 financial services' },
-    { reg: 'AMLA', query: 'AMLA Anti-Money Laundering Authority EU 2026' },
-    { reg: 'PSD3 / PSR', query: 'PSD3 PSR payment services directive 2026 fintech' },
+    { reg: 'CSRD', query: 'CSRD Corporate Sustainability Reporting Directive EU 2026 impact' },
+    { reg: 'EU Taxonomy', query: 'EU Taxonomy Regulation green finance eligible activities 2026' },
     { reg: 'EU Fin Reg', query: 'EU financial regulation enforcement deadline 2026 startup opportunity' },
   ];
 
@@ -456,7 +456,7 @@ const RegulatoryEngine = ({ apiKey, tvKey }) => {
 
           const system =
             'You are a regulatory intelligence analyst for a VC fund. Respond ONLY with valid JSON, no markdown.';
-          const prompt = `Analyse the regulatory impact of "${reg}" for EU FinTech startups.
+          const prompt = `Analyse the regulatory impact of "${reg}" for EU ecological transition startups (clean mobility, low-carbon economy, smart cities, circular economy, agrotech).
 
 News/context:
 ${snippets || 'No recent data found. Use general knowledge.'}
@@ -531,7 +531,7 @@ Rules:
           <EmptyState
             icon="⚖"
             title="No regulatory data yet"
-            subtitle="Predict which EU regulations create or destroy FinTech moats"
+            subtitle="Predict which EU regulations create or destroy cleantech moats"
           />
         )}
         {!loading &&
@@ -614,8 +614,8 @@ const MarketSignalFeed = ({ apiKey, tvKey }) => {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const SIGNAL_QUERIES = [
-    'EU FinTech RegTech startup launch new company 2026',
-    'European fintech funding round Series A 2026',
+    'EU cleantech ecological transition startup funding 2026',
+    'European clean mobility EV charging energy storage startup 2026',
     'AI compliance regtech startup Europe 2026',
     'insurtech startup EU launch 2026',
     'embedded finance banking-as-a-service Europe 2026',
@@ -625,7 +625,7 @@ const MarketSignalFeed = ({ apiKey, tvKey }) => {
     'New Entrants',
     'Funding Activity',
     'AI Compliance',
-    'InsurTech',
+    'Circular Economy',
     'Embedded Finance',
   ];
 
@@ -663,7 +663,7 @@ const MarketSignalFeed = ({ apiKey, tvKey }) => {
 
           const system =
             'You are a VC market intelligence analyst. Respond ONLY with valid JSON array, no markdown.';
-          const prompt = `Extract 2-3 key market signals from these news items for a FinTech/RegTech VC fund.
+          const prompt = `Extract 2-3 key market signals from these news items for Meridiam GIGF, an ecological transition growth equity fund.
 
 Category: ${SIGNAL_LABELS[idx]}
 Articles:
@@ -675,7 +675,7 @@ Output a JSON array:
 Rules:
 - headline: concise 8-word max title
 - insight: 1-sentence VC-relevant takeaway
-- Only include items relevant to EU FinTech/RegTech/InsurTech thesis`;
+- Only include items relevant to EU ecological transition: clean mobility, low-carbon economy, smart cities, circular economy, agrotech`;
 
           try {
             const raw = await claudeAPI(system, prompt, apiKey);
@@ -754,7 +754,7 @@ Rules:
           <EmptyState
             icon="📡"
             title="Auto-scanning on load"
-            subtitle="Live market signals across EU FinTech, RegTech, InsurTech"
+            subtitle="Live market signals across EU cleantech, clean mobility, circular economy"
           />
         )}
         {!loading &&

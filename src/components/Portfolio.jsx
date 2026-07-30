@@ -1,116 +1,140 @@
 import { useState } from 'react'
-import { claudeAPI, parseJSON, tavily, PORTFOLIO_SYSTEM, PORTFOLIO } from '../api'
-import { Card, Label, Badge, Button, Empty } from './UI'
+import { claudeAPI, PORTFOLIO_SYSTEM } from '../api'
+
+const PORTCOS = [
+  { name: 'Chargepoly',  sector: 'Clean Mobility',      stage: 'Series B', board: 'Alexandre Derreumaux', co2: 'Heavy-duty EV charging infrastructure' },
+  { name: 'iwell',       sector: 'Low-carbon Economy',  stage: 'Series B', board: 'Alexandre Derreumaux', co2: 'Smart battery storage + EMS' },
+  { name: 'Oxand',       sector: 'Smart Cities',        stage: 'Growth',   board: 'Meridiam GIGF',        co2: 'Asset lifecycle management software' },
+  { name: 'Exoès',       sector: 'Clean Mobility',      stage: 'Growth',   board: 'Meridiam GIGF',        co2: 'EV thermal management engineering' },
+  { name: 'ESG Book',    sector: 'Low-carbon Data',     stage: 'Series B', board: 'Meridiam GIGF',        co2: 'ESG data infrastructure platform' },
+]
+
+const SECTOR_COLORS = {
+  'Clean Mobility':     'bg-blue-500/15 text-blue-400 border-blue-500/25',
+  'Low-carbon Economy': 'bg-green-500/15 text-green-400 border-green-500/25',
+  'Smart Cities':       'bg-purple-500/15 text-purple-400 border-purple-500/25',
+  'Low-carbon Data':    'bg-cyan-500/15 text-cyan-400 border-cyan-500/25',
+  'Circular Economy':   'bg-amber-500/15 text-amber-400 border-amber-500/25',
+}
 
 export default function Portfolio({ apiKey, tvKey }) {
-  const [signals, setSignals] = useState({})
-  const [loading, setLoading] = useState(null)
+  const [selected, setSelected] = useState(null)
+  const [signal, setSignal]     = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
 
-  const getSignal = async (company) => {
-    setLoading(company.name)
+  const getUpdate = async (company) => {
+    if (!apiKey) { setError('No API key — go to Settings.'); return }
+    setSelected(company.name); setLoading(true); setSignal(null); setError('')
     try {
-      let ctx = `${company.name} (${company.desc}), ${company.sector}, ${company.stage}`
-      const td = await tavily(`${company.name} news competitor funding 2025 2026`, tvKey)
-      if (td?.results) ctx += '\\n' + td.results.map(r => r.title + ': ' + (r.content||'')).slice(0,3).join('\\n')
-      const raw = await claudeAPI(PORTFOLIO_SYSTEM, ctx, apiKey)
-      const s = parseJSON(raw)
-      setSignals(prev => ({...prev, [company.name]: s}))
-    } catch(e) { setSignals(prev => ({...prev, [company.name]: {error: e.message}})) }
-    setLoading(null)
+      const raw = await claudeAPI(
+        PORTFOLIO_SYSTEM,
+        `Analyse ${company.name} (${company.sector}, ${company.stage}) for GIGF quarterly board prep. CO2 focus: ${company.co2}. What are the latest competitive threats, growth signals, and impact updates?`,
+        apiKey
+      )
+      const clean = raw.replace(/```json|```/g, '').trim()
+      const start = clean.indexOf('{'); const end = clean.lastIndexOf('}')
+      if (start >= 0 && end >= 0) setSignal(JSON.parse(clean.slice(start, end+1)))
+    } catch(e) { setError(e.message) }
+    setLoading(false)
   }
-
-  const scanAll = async () => {
-    for (const c of PORTFOLIO) {
-      await getSignal(c)
-    }
-  }
-
-  const sigColor = s => s === 'Positive' ? 'text-green-400' : s === 'Concern' ? 'text-red-400' : 'text-amber-400'
 
   return (
     <div>
-      <div className="mb-5">
-        <Label>Portfolio Monitor</Label>
-        <h2 className="text-xl font-bold text-white mt-1">Competitive Intelligence</h2>
-        <p className="text-white/40 text-sm mt-0.5">Real-time signals across 8 portfolio companies. Click any company for an update.</p>
+      <div className="mb-6">
+        <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-gold">Portfolio Monitor</span>
+        <h2 className="text-2xl font-bold text-white mt-1">Competitive Intelligence</h2>
+        <p className="text-white/40 text-sm mt-1">Real-time signals across {PORTCOS.length} portfolio companies. Click any company for an update.</p>
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <Button onClick={scanAll} className="flex-none">Scan All Companies</Button>
+      <button onClick={() => PORTCOS.forEach((p, i) => setTimeout(() => getUpdate(p), i * 800))}
+        className="w-full bg-gold text-navy rounded-xl py-3 font-bold text-sm mb-5 hover:bg-gold-2 transition-colors">
+        Scan All Companies
+      </button>
+
+      <div className="bg-navy-2 border border-white/10 rounded-xl overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-white/8">
+              {['COMPANY','SECTOR','STAGE','BOARD','LATEST SIGNAL','ACTION'].map(h => (
+                <th key={h} className="text-left px-4 py-3 text-[9px] font-bold tracking-[0.12em] uppercase text-white/30">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {PORTCOS.map((p, i) => (
+              <tr key={p.name} className={`border-b border-white/5 last:border-0 ${selected === p.name ? 'bg-gold/5' : 'hover:bg-white/2'} transition-colors`}>
+                <td className="px-4 py-3.5 text-white font-semibold text-sm">{p.name}</td>
+                <td className="px-4 py-3.5">
+                  <span className={`text-[9px] font-bold px-2 py-1 rounded border ${SECTOR_COLORS[p.sector] || 'bg-white/8 text-white/50 border-white/10'}`}>
+                    {p.sector.toUpperCase()}
+                  </span>
+                </td>
+                <td className="px-4 py-3.5 text-white/50 text-xs">{p.stage}</td>
+                <td className="px-4 py-3.5 text-white/40 text-xs">{p.board || '—'}</td>
+                <td className="px-4 py-3.5 text-white/40 text-xs">
+                  {selected === p.name && signal ? (
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${signal.signal === 'Positive' ? 'bg-green-500/15 text-green-400' : signal.signal === 'Risk' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'}`}>
+                      {signal.signal}
+                    </span>
+                  ) : '—'}
+                </td>
+                <td className="px-4 py-3.5">
+                  <button onClick={() => getUpdate(p)}
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-white/6 text-white/50 hover:bg-gold/15 hover:text-gold border border-white/8 hover:border-gold/25 transition-all">
+                    {loading && selected === p.name ? 'Scanning…' : 'Update'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* PORTFOLIO TABLE */}
-      <Card className="mb-4 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/10">
-              {['Company','Sector','Stage','Board','Latest Signal','Action'].map(h => <th key={h} className="text-left py-2.5 px-3 text-[9px] font-bold tracking-[0.1em] uppercase text-white/30">{h}</th>)}
-            </tr></thead>
-            <tbody>
-              {PORTFOLIO.map(c => {
-                const sig = signals[c.name]
-                return (
-                  <tr key={c.name} className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors">
-                    <td className="py-3 px-3 font-semibold text-white">{c.name}</td>
-                    <td className="py-3 px-3"><Badge>{c.sector}</Badge></td>
-                    <td className="py-3 px-3 font-mono text-[10px] text-white/50">{c.stage}</td>
-                    <td className="py-3 px-3 text-xs text-gold/70">{c.board || '—'}</td>
-                    <td className="py-3 px-3">
-                      {loading === c.name ? <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin"/> :
-                       sig?.error ? <span className="text-red-400 text-xs">Error</span> :
-                       sig ? <span className={`text-xs font-medium ${sigColor(sig.signal)}`}>{sig.signal} — {sig.headline_development?.slice(0,50)}...</span> :
-                       <span className="text-white/20 text-xs">—</span>}
-                    </td>
-                    <td className="py-3 px-3">
-                      <button onClick={()=>getSignal(c)} disabled={loading===c.name}
-                        className="text-[10px] px-2.5 py-1 bg-white/5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30">
-                        {loading===c.name ? '...' : 'Update'}
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* SIGNAL CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {PORTFOLIO.filter(c => signals[c.name] && !signals[c.name].error).map(c => {
-          const sig = signals[c.name]
-          return (
-            <Card key={c.name} className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="font-semibold text-white text-sm">{c.name}</p>
-                  <p className="text-[10px] text-white/30">{c.sector} · {c.stage}</p>
-                </div>
-                <Badge>{sig.signal}</Badge>
+      {/* Signal detail panel */}
+      {signal && selected && (
+        <div className="mt-5 bg-navy-2 border border-white/10 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-bold">{selected} — Latest Intel</h3>
+            <span className={`text-[9px] font-bold px-2 py-1 rounded ${signal.signal === 'Positive' ? 'bg-green-500/15 text-green-400 border border-green-500/25' : 'bg-amber-500/15 text-amber-400 border border-amber-500/25'}`}>
+              {signal.signal}
+            </span>
+          </div>
+          {signal.headline_development && (
+            <div className="mb-3">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-white/30 mb-1">Headline Development</p>
+              <p className="text-sm text-white/70 leading-relaxed">{signal.headline_development}</p>
+            </div>
+          )}
+          {signal.impact_update && (
+            <div className="mb-3 bg-gold/8 border border-gold/20 rounded-lg p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-gold mb-1">🌱 Impact Update</p>
+              <p className="text-sm text-white/70">{signal.impact_update}</p>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-4 mb-3">
+            {signal.competitive_threats?.length > 0 && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-red-400 mb-2">Competitive Threats</p>
+                {signal.competitive_threats.map((t,i) => <p key={i} className="text-xs text-white/55 mb-1">⚑ {t}</p>)}
               </div>
-              <p className="text-xs font-medium text-white/70 mb-1">{sig.headline_development}</p>
-              {sig.competitive_threats?.filter(Boolean).length > 0 && (
-                <div className="mt-1.5">
-                  <p className="text-[9px] text-white/30 uppercase tracking-wider mb-1">Threats</p>
-                  <p className="text-xs text-red-400/70">{sig.competitive_threats.join(' · ')}</p>
-                </div>
-              )}
-              {sig.growth_signals?.filter(Boolean).length > 0 && (
-                <div className="mt-1.5">
-                  <p className="text-[9px] text-white/30 uppercase tracking-wider mb-1">Growth Signals</p>
-                  <p className="text-xs text-green-400/70">{sig.growth_signals.join(' · ')}</p>
-                </div>
-              )}
-              {sig.recommended_action && (
-                <div className="mt-2 pt-2 border-t border-white/5">
-                  <p className="text-[9px] text-gold uppercase tracking-wider mb-0.5">Recommended Action</p>
-                  <p className="text-xs text-white/60">{sig.recommended_action}</p>
-                </div>
-              )}
-            </Card>
-          )
-        })}
-      </div>
+            )}
+            {signal.growth_signals?.length > 0 && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-green-400 mb-2">Growth Signals</p>
+                {signal.growth_signals.map((s,i) => <p key={i} className="text-xs text-white/55 mb-1">↑ {s}</p>)}
+              </div>
+            )}
+          </div>
+          {signal.recommended_action && (
+            <div className="bg-gold/8 border border-gold/20 rounded-lg p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-gold mb-1">Recommended Action</p>
+              <p className="text-sm text-white/70">{signal.recommended_action}</p>
+            </div>
+          )}
+          {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+        </div>
+      )}
     </div>
   )
 }

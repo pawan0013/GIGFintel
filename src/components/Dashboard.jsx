@@ -13,17 +13,17 @@ import Calendar from './Calendar'
 import LoginDashboard from './LoginDashboard'
 
 const NAV = [
-  { id: 'dashboard', label: 'Briefing',    icon: '🌿', desc: 'Morning impact brief' },
-  { id: 'screener',  label: 'Screener',    icon: '🔍', desc: 'GIGF thesis screener' },
-  { id: 'inbox',     label: 'Inbox',       icon: '📬', desc: 'Pitch triage' },
-  { id: 'radar',     label: 'Radar',       icon: '🌍', desc: 'Cleantech intelligence' },
-  { id: 'intel',     label: 'Intel',       icon: '⚡', badge: 'NEW' },
-  { id: 'portfolio', label: 'Portfolio',   icon: '🌱', desc: 'Portfolio signals' },
-  { id: 'portcoai',  label: 'Impact AI',   icon: '♻️', desc: 'Portco analysis' },
-  { id: 'tracker',   label: 'Tracker',     icon: '📋', desc: 'Pipeline & decisions' },
-  { id: 'calendar',  label: 'Calendar',    icon: '🗓', desc: 'Meeting prep' },
-  { id: 'assistant', label: 'Assistant',   icon: '🤖', desc: 'GIGF AI analyst' },
-  { id: 'ops',       label: 'Settings',    icon: '⚙', desc: 'API keys & config' },
+  { id: 'dashboard', label: 'Briefing',   icon: '◈' },
+  { id: 'screener',  label: 'Screener',   icon: '⊹' },
+  { id: 'inbox',     label: 'Inbox',      icon: '⌂' },
+  { id: 'radar',     label: 'Radar',      icon: '◎' },
+  { id: 'intel',     label: 'Intel',      icon: '⚡', badge: 'NEW' },
+  { id: 'portfolio', label: 'Portfolio',  icon: '◫' },
+  { id: 'portcoai',  label: 'Impact AI',  icon: '◉' },
+  { id: 'tracker',   label: 'Tracker',    icon: '▤' },
+  { id: 'calendar',  label: 'Calendar',   icon: '◷' },
+  { id: 'assistant', label: 'Assistant',  icon: '⊛' },
+  { id: 'ops',       label: 'Settings',   icon: '⚙' },
 ]
 
 export default function Dashboard({
@@ -47,60 +47,56 @@ export default function Dashboard({
   const safeName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'Analyst'
 
   return (
-    <div className="h-screen flex overflow-hidden" style={{ background: '#0a1f0f', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+    <div className="h-screen bg-navy flex overflow-hidden"
+         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
 
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/70 z-40 lg:hidden" onClick={() => setSidebarOpen(false)}/>
+        <div className="fixed inset-0 bg-black/70 z-40 lg:hidden"
+             onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* ── SIDEBAR ── */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-52 flex flex-col flex-shrink-0
+        bg-[#0a1f0f] border-r border-white/8
         transition-transform duration-200 ease-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto`}
-        style={{ background: '#0a1f0f', borderRight: '1px solid rgba(74,158,107,0.12)' }}>
+        lg:translate-x-0 lg:static lg:z-auto`}>
 
         {/* Logo */}
-        <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(74,158,107,0.12)' }}>
+        <div className="px-5 py-6 border-b border-white/8">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(74,158,107,0.15)', border: '1px solid rgba(74,158,107,0.3)' }}>
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2 C12 2 21 7 21 14 C21 19.5 17 22.5 12 22.5 C7 22.5 3 19.5 3 14 C3 7 12 2 12 2Z" fill="rgba(74,158,107,0.3)" stroke="#4a9e6b" strokeWidth="1.5"/>
-                <path d="M12 22.5 L12 10" stroke="#4a9e6b" strokeWidth="1.5" strokeLinecap="round"/>
+            <div className="w-8 h-8 rounded-lg bg-gold/15 border border-gold/30 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C12 2 20 7 20 14C20 19.5 16.4 22.5 12 22.5C7.6 22.5 4 19.5 4 14C4 7 12 2 12 2Z"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 22.5L12 10"/>
               </svg>
             </div>
             <div>
               <p className="text-white font-bold text-sm tracking-tight leading-none">GIGF Intel</p>
-              <p className="text-[9px] font-bold tracking-[0.2em] uppercase mt-0.5" style={{ color: '#4a9e6b' }}>Meridiam</p>
+              <p className="text-gold text-[9px] font-bold tracking-[0.22em] uppercase mt-0.5">Meridiam</p>
             </div>
           </div>
         </div>
 
-        {/* Impact badge */}
-        <div className="mx-3 my-3 rounded-lg px-3 py-2" style={{ background: 'rgba(74,158,107,0.08)', border: '1px solid rgba(74,158,107,0.15)' }}>
-          <p className="text-[8px] font-bold tracking-widest uppercase mb-1" style={{ color: '#4a9e6b' }}>Article 9 SFDR</p>
-          <p className="text-[9px]" style={{ color: 'rgba(232,245,238,0.5)' }}>EUR 220M · GREENFIN Certified</p>
+        {/* Impact badge - subtle dark style like BlackFin */}
+        <div className="mx-3 mt-3 rounded-lg px-3 py-2 bg-white/4 border border-white/8">
+          <p className="text-[8px] font-bold tracking-[0.18em] uppercase text-gold/80">Article 9 SFDR</p>
+          <p className="text-[9px] text-white/35 mt-0.5">EUR 220M · GREENFIN Certified</p>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-1">
+        <nav className="flex-1 overflow-y-auto py-2">
           {NAV.map(item => {
             const active = tab === item.id
             return (
               <button key={item.id}
                 onClick={() => { setTab(item.id); setSidebarOpen(false) }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-all duration-150 relative"
-                style={{
-                  color: active ? '#4a9e6b' : 'rgba(232,245,238,0.45)',
-                  background: active ? 'rgba(74,158,107,0.1)' : 'transparent',
-                  borderRight: active ? '2px solid #4a9e6b' : '2px solid transparent',
-                }}>
-                <span className="text-base leading-none">{item.icon}</span>
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-all duration-150 relative
+                  ${active ? 'text-gold bg-gold/10 border-r-2 border-gold' : 'text-white/50 hover:text-white/80 hover:bg-white/4'}`}>
+                <span className={`text-base leading-none ${active ? 'text-gold' : 'text-white/30'}`}>{item.icon}</span>
                 <span className="flex-1 text-left">{item.label}</span>
                 {item.badge && (
-                  <span className="text-[8px] font-bold tracking-widest uppercase px-1.5 py-0.5 rounded-sm"
-                    style={{ background: 'rgba(74,158,107,0.2)', color: '#4a9e6b', border: '1px solid rgba(74,158,107,0.3)' }}>
+                  <span className="text-[8px] font-bold tracking-widest uppercase px-1.5 py-0.5 rounded-sm bg-gold/20 text-gold border border-gold/30">
                     {item.badge}
                   </span>
                 )}
@@ -110,25 +106,21 @@ export default function Dashboard({
         </nav>
 
         {/* User */}
-        <div className="px-4 py-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(74,158,107,0.12)' }}>
+        <div className="px-4 py-4 border-t border-white/8 flex-shrink-0">
           <div className="flex items-center gap-2.5 mb-3">
             {user?.photoURL
-              ? <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full flex-shrink-0" style={{ border: '1px solid rgba(74,158,107,0.3)' }}/>
-              : <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(74,158,107,0.2)', border: '1px solid rgba(74,158,107,0.3)' }}>
-                  <span className="text-xs font-bold" style={{ color: '#4a9e6b' }}>{safeName[0]?.toUpperCase()}</span>
+              ? <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full border border-white/15 flex-shrink-0"/>
+              : <div className="w-7 h-7 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gold text-xs font-bold">{safeName[0]?.toUpperCase()}</span>
                 </div>
             }
             <div className="min-w-0 flex-1">
               <p className="text-white text-xs font-semibold truncate leading-tight">{safeName}</p>
-              <p className="text-[10px] mt-0.5" style={{ color: 'rgba(232,245,238,0.35)' }}>GIGF Analyst</p>
+              <p className="text-white/35 text-[10px] mt-0.5">GIGF Analyst</p>
             </div>
           </div>
           <button onClick={onLogout}
-            className="flex items-center gap-2 text-xs transition-colors duration-150"
-            style={{ color: 'rgba(232,245,238,0.3)' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'rgba(232,245,238,0.6)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(232,245,238,0.3)'}>
+            className="flex items-center gap-2 text-white/30 hover:text-white/60 text-xs transition-colors duration-150">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
             </svg>
@@ -139,9 +131,8 @@ export default function Dashboard({
 
       {/* ── MAIN ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 flex-shrink-0"
-          style={{ background: '#0a1f0f', borderBottom: '1px solid rgba(74,158,107,0.12)' }}>
-          <button onClick={() => setSidebarOpen(true)} style={{ color: 'rgba(232,245,238,0.5)' }}>
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#0a1f0f] border-b border-white/8 flex-shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="text-white/50 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
@@ -156,17 +147,12 @@ export default function Dashboard({
             <div className={tab === 'dashboard' ? '' : 'hidden'}>
               {showBriefing
                 ? <LoginDashboard user={user} apiKey={apiKey} tvKey={tvKey} slackHook={slackHook} deals={deals} calendarEvents={[]} onNavigate={setTab} onDismiss={() => setShowBriefing(false)}/>
-                : <div className="rounded-xl p-5 flex items-center justify-between"
-                    style={{ background: 'rgba(15,45,23,0.6)', border: '1px solid rgba(74,158,107,0.15)' }}>
+                : <div className="bg-navy-2 border border-white/10 rounded-xl p-5 flex items-center justify-between">
                     <div>
                       <p className="text-white font-semibold">Daily Impact Briefing</p>
-                      <p className="text-sm mt-0.5" style={{ color: 'rgba(232,245,238,0.4)' }}>Reopen your AI-powered morning brief</p>
+                      <p className="text-white/40 text-sm mt-0.5">Reopen your AI-powered morning brief</p>
                     </div>
-                    <button onClick={() => setShowBriefing(true)}
-                      className="rounded-xl px-4 py-2 font-bold text-sm transition-colors"
-                      style={{ background: '#4a9e6b', color: '#0a1f0f' }}>
-                      Reopen
-                    </button>
+                    <button onClick={() => setShowBriefing(true)} className="bg-gold text-navy rounded-xl px-4 py-2 font-bold text-sm hover:bg-gold-2 transition-colors">Reopen</button>
                   </div>
               }
             </div>

@@ -216,209 +216,212 @@ function exportWord(m) {
 // ─── Export: PowerPoint (.pptx) ───────────────────────────────────────────────
 async function exportPPTX(m) {
   const { default: pptxgen } = await import('pptxgenjs')
-  const prs = new pptxgen()
-  prs.layout = 'LAYOUT_WIDE'
 
-  const DARK='0A1F0F', MID='0F2D17', GREEN='2D7A47', LITE='4A9E6B'
-  const WHITE='FFFFFF', GREY='B0C4BB', LGREY='D4E8DC', GOLD='C9A84C'
+  // EXACT template colors
+  const BG_DARK='162F28', BG_LIGHT='FFFFFF', BG_MID='D7E2DD', BG_CREAM='F7F9F8'
+  const TEAL='5ECCB5', TEAL_DIM='3FA88F', TEAL_DARK='122E26'
+  const TXT_DARK='162F28', TXT_MED='1F2A24', TXT_GREY='8C9994', TXT_WHITE='FFFFFF'
   const ff='Plus Jakarta Sans'
 
-  const score = m.thesis_fit_score || 75
-  const scoreCol = score>=70?'2D7A47':score>=45?'C9A84C':'E05252'
-  const recCol   = m.recommendation==='INVEST'?'2D7A47':m.recommendation==='PASS'?'E05252':'C9A84C'
+  const score   = m.thesis_fit_score || 75
+  const recText = m.recommendation   || 'INVEST'
+  const conf    = (m.confidence_level||'MEDIUM').toUpperCase()
+  const today   = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
 
   const hdr = (s, sec, title) => {
-    s.addShape('RECTANGLE',{x:0,y:0,w:'100%',h:0.55,fill:{color:MID},line:{color:MID}})
-    s.addShape('OVAL',{x:0.18,y:0.1,w:0.35,h:0.35,fill:{color:LITE},line:{color:LITE}})
-    s.addText('M',{x:0.18,y:0.1,w:0.35,h:0.35,fontSize:14,bold:true,color:WHITE,align:'center',valign:'middle',fontFace:ff})
-    s.addText('Meridiam',{x:0.58,y:0.12,w:1.5,h:0.18,fontSize:9,bold:true,color:WHITE,fontFace:ff})
-    s.addText('GIGF',{x:0.58,y:0.3,w:1.5,h:0.16,fontSize:7,color:LITE,fontFace:ff,charSpacing:3})
-    s.addText(sec,{x:2.4,y:0.16,w:6,h:0.25,fontSize:7.5,color:GREY,charSpacing:1.5,fontFace:ff})
-    s.addText(title,{x:2.4,y:0.26,w:8,h:0.22,fontSize:9.5,bold:true,color:WHITE,fontFace:ff})
-    s.addText('Meridiam GIGF',{x:11.5,y:0.18,w:1.6,h:0.2,fontSize:7.5,color:GREY,align:'right',fontFace:ff})
+    s.addShape('RECTANGLE',{x:0,y:0,w:10,h:0.219,fill:{color:TXT_WHITE},line:{color:TXT_WHITE}})
+    s.addText(sec,{x:3.159,y:0.047,w:6.5,h:0.164,fontSize:8,color:TXT_DARK,charSpacing:1,fontFace:ff})
+    s.addShape('OVAL',{x:8.812,y:0.219,w:0.25,h:0.25,fill:{color:TEAL},line:{color:TEAL}})
+    s.addText('M',{x:8.812,y:0.219,w:0.25,h:0.25,fontSize:12,bold:true,color:TXT_WHITE,align:'center',valign:'middle',fontFace:ff})
+    s.addText('Meridiam',{x:9.09,y:0.229,w:0.78,h:0.22,fontSize:8,bold:true,color:TXT_DARK,fontFace:ff})
+    s.addShape('LINE',{x:0,y:0.215,w:10,h:0,line:{color:BG_MID,width:1}})
+    s.addText(sec,{x:0.375,y:0.246,w:9.25,h:0.18,fontSize:8,color:TEAL_DIM,charSpacing:1.5,fontFace:ff})
+    s.addText(title,{x:0.375,y:0.44,w:9.444,h:0.315,fontSize:19,bold:true,color:TXT_DARK,fontFace:ff})
   }
-  const pgn = (s,n,t) => {
-    s.addShape('RECTANGLE',{x:0,y:7.3,w:'100%',h:0.2,fill:{color:MID},line:{color:MID}})
-    s.addText(`${String(n).padStart(2,'0')} / ${String(t).padStart(2,'0')}`,{x:0.2,y:7.32,w:2,h:0.16,fontSize:7,color:GREY,fontFace:ff})
-    s.addText('MERIDIAM GIGF · IC MEMO',{x:4,y:7.32,w:5.3,h:0.16,fontSize:7,color:GREY,align:'center',charSpacing:1.5,fontFace:ff})
-    s.addText('CONFIDENTIAL',{x:11,y:7.32,w:2.3,h:0.16,fontSize:7,color:GREY,align:'right',charSpacing:1.5,fontFace:ff})
+  const ftr = (s,n,t) => {
+    s.addShape('LINE',{x:0,y:5.41,w:10,h:0,line:{color:BG_MID,width:0.5}})
+    s.addText('MERIDIAM GIGF · IC MEMO',{x:0.375,y:5.433,w:8.9,h:0.18,fontSize:8,color:TXT_GREY,charSpacing:1.5,fontFace:ff})
+    s.addText(`${String(n).padStart(2,'0')} / ${String(t).padStart(2,'0')}`,{x:9.274,y:5.43,w:0.4,h:0.18,fontSize:6,color:TXT_GREY,align:'right',fontFace:ff})
   }
-  const div = (s,x,y,w) => s.addShape('LINE',{x,y,w,h:0,line:{color:GREEN,width:0.5}})
-  const slbl = (s,t,x,y) => s.addText(t,{x,y,w:8,h:0.16,fontSize:6.5,bold:true,color:LITE,charSpacing:2,fontFace:ff})
+  const slbl=(s,t,x,y,w)=>s.addText(t,{x,y,w:w||4.562,h:0.126,fontSize:8,color:TEAL_DIM,bold:true,charSpacing:1.5,fontFace:ff})
+  const lbl=(s,t,x,y,w)=>s.addText(t,{x,y,w:w||3.45,h:0.113,fontSize:8,color:TXT_GREY,fontFace:ff})
+  const div=(s,x,y,w)=>s.addShape('LINE',{x,y,w,h:0,line:{color:BG_MID,width:0.5}})
+  const wm=(s)=>s.addText('Meridiam GIGF',{x:-2.039,y:1.195,w:14.078,h:3.493,fontSize:141,bold:true,color:TEAL,transparency:85,fontFace:ff})
 
-  // SLIDE 1 — Cover
-  const s1 = prs.addSlide(); s1.background={color:DARK}
-  hdr(s1,'MERIDIAM GIGF · INVESTMENT COMMITTEE MEMO · CONFIDENTIAL','IC Investment Memo')
-  s1.addShape('RECTANGLE',{x:0,y:0.55,w:7.2,h:6.75,fill:{color:MID},line:{color:MID}})
-  s1.addText('PORTFOLIO SNAPSHOT',{x:0.3,y:0.75,w:3,h:0.18,fontSize:6.5,bold:true,color:LITE,charSpacing:2,fontFace:ff})
-  s1.addText('COMPANY',{x:0.3,y:0.98,w:1.5,h:0.16,fontSize:6.5,color:GREY,fontFace:ff})
-  div(s1,0.3,1.16,6.7)
-  s1.addText(m.company||'',{x:0.3,y:1.22,w:6.7,h:1.1,fontSize:52,bold:true,color:WHITE,fontFace:ff,fit:'shrink'})
-  s1.addText(m.tagline||'',{x:0.3,y:2.35,w:6.6,h:0.35,fontSize:13,color:LGREY,fontFace:ff})
-  const meta=[m.sector,m.stage,m.geography].filter(Boolean).join('  ·  ')
-  s1.addText(meta,{x:0.3,y:2.78,w:6.6,h:0.25,fontSize:10,color:GREY,fontFace:ff})
-  div(s1,0.3,3.12,6.7)
-  s1.addText('RECOMMENDATION',{x:0.3,y:3.22,w:3,h:0.18,fontSize:6.5,color:GREY,charSpacing:1.5,fontFace:ff})
-  s1.addShape('RECTANGLE',{x:0.3,y:3.44,w:2.6,h:0.46,fill:{color:recCol,transparency:87},line:{color:recCol,width:1}})
-  s1.addText(m.recommendation||'INVEST',{x:0.3,y:3.44,w:2.6,h:0.46,fontSize:11,bold:true,color:recCol,align:'center',valign:'middle',charSpacing:1,fontFace:ff,fit:'shrink'})
-  if(m.impact?.co2_avoided){
-    s1.addShape('RECTANGLE',{x:3.1,y:3.44,w:3.9,h:0.46,fill:{color:LITE,transparency:88},line:{color:LITE,width:0.5}})
-    s1.addText(`🌱  ${m.impact.co2_avoided}`,{x:3.1,y:3.44,w:3.9,h:0.46,fontSize:8,color:LITE,align:'center',valign:'middle',fontFace:ff,fit:'shrink'})
-  }
-  div(s1,0.3,4.05,6.7)
-  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
-  s1.addText(`PREPARED BY · GIGF INTELLIGENCE  ·  DATE · ${today}`,{x:0.3,y:6.75,w:6.7,h:0.18,fontSize:6.5,color:GREY,charSpacing:1,fontFace:ff})
-  s1.addShape('RECTANGLE',{x:7.2,y:0.55,w:6.13,h:6.75,fill:{color:DARK},line:{color:DARK}})
-  s1.addText('THESIS FIT',{x:7.4,y:0.85,w:5.7,h:0.2,fontSize:7.5,color:GREY,charSpacing:2,fontFace:ff})
-  s1.addText(String(score),{x:7.4,y:1.1,w:5.7,h:2.2,fontSize:120,bold:true,color:scoreCol,fontFace:'Courier New',align:'center'})
-  s1.addText('/100',{x:10.2,y:3.0,w:3.1,h:0.4,fontSize:16,color:GREY,fontFace:ff})
-  s1.addText(`CONFIDENCE: ${(m.confidence_level||'MEDIUM').toUpperCase()}`,{x:7.4,y:3.45,w:5.7,h:0.25,fontSize:8,bold:true,color:scoreCol,charSpacing:1.5,align:'center',fontFace:ff})
-  div(s1,7.4,3.85,5.7)
-  if(m.impact?.sdg_alignment?.length>0){
-    s1.addText('SDG ALIGNMENT',{x:7.4,y:4.0,w:5.7,h:0.18,fontSize:6.5,color:GREY,charSpacing:1.5,fontFace:ff})
-    s1.addText((m.impact.sdg_alignment||[]).slice(0,4).join('  ·  '),{x:7.4,y:4.22,w:5.7,h:0.3,fontSize:8.5,color:LITE,fontFace:ff})
-  }
-  s1.addShape('RECTANGLE',{x:7.4,y:5.9,w:2.6,h:0.35,fill:{color:LITE,transparency:88},line:{color:LITE,width:0.5}})
-  s1.addText('Article 9 SFDR',{x:7.4,y:5.9,w:2.6,h:0.35,fontSize:8,bold:true,color:LITE,align:'center',valign:'middle',fontFace:ff})
-  s1.addShape('RECTANGLE',{x:10.2,y:5.9,w:2.9,h:0.35,fill:{color:LITE,transparency:88},line:{color:LITE,width:0.5}})
-  s1.addText('GREENFIN Certified',{x:10.2,y:5.9,w:2.9,h:0.35,fontSize:8,bold:true,color:LITE,align:'center',valign:'middle',fontFace:ff})
-  pgn(s1,1,6)
+  const prs = new pptxgen()
+  prs.layout = 'LAYOUT_16x9'
 
-  // SLIDE 2 — Thesis & Scoring
-  const s2=prs.addSlide(); s2.background={color:DARK}
+  // ── SLIDE 1: COVER ──────────────────────────────────────────────
+  const s1=prs.addSlide(); s1.background={color:TXT_WHITE}
+  s1.addShape('RECTANGLE',{x:0,y:0,w:5.8,h:5.625,fill:{color:BG_DARK},line:{color:BG_DARK}})
+  s1.addShape('RECTANGLE',{x:0,y:0,w:10,h:0.219,fill:{color:TXT_WHITE},line:{color:TXT_WHITE}})
+  s1.addText('MERIDIAM GIGF · INVESTMENT COMMITTEE MEMO · CONFIDENTIAL',{x:3.159,y:0.047,w:6.5,h:0.164,fontSize:8,color:TXT_DARK,charSpacing:1,fontFace:ff})
+  s1.addShape('OVAL',{x:8.812,y:0.219,w:0.25,h:0.25,fill:{color:TEAL},line:{color:TEAL}})
+  s1.addText('M',{x:8.812,y:0.219,w:0.25,h:0.25,fontSize:12,bold:true,color:TXT_WHITE,align:'center',valign:'middle',fontFace:ff})
+  s1.addText('Meridiam',{x:9.09,y:0.229,w:0.78,h:0.22,fontSize:8,bold:true,color:TXT_DARK,fontFace:ff})
+  // Left panel logo
+  s1.addShape('OVAL',{x:0.375,y:1.899,w:0.5,h:0.5,fill:{color:TEAL_DARK},line:{color:TEAL_DARK}})
+  s1.addText('M',{x:0.375,y:1.899,w:0.5,h:0.5,fontSize:24,bold:true,color:TEAL,align:'center',valign:'middle',fontFace:ff})
+  s1.addText('MeridiamGIGF',{x:0.984,y:1.974,w:4.441,h:0.414,fontSize:22,bold:true,color:BG_DARK,fontFace:ff})
+  s1.addShape('RECTANGLE',{x:0.375,y:2.54,w:5.05,h:0.023,fill:{color:TEAL},line:{color:TEAL}})
+  s1.addText('INVESTMENT COMMITTEE MEMO',{x:0.375,y:2.782,w:5.17,h:0.177,fontSize:8,color:BG_DARK,charSpacing:1.5,fontFace:ff})
+  s1.addText('IC Investment Memo',{x:0.375,y:2.989,w:5.05,h:0.5,fontSize:31,bold:true,color:BG_DARK,fontFace:ff})
+  s1.addText('Confidential · For internal IC circulation only',{x:0.375,y:3.573,w:5.17,h:0.18,fontSize:8,color:BG_DARK,fontFace:ff})
+  s1.addText('PREPARED BY · GIGF INTELLIGENCE',{x:0.375,y:4.805,w:5.17,h:0.118,fontSize:8,color:BG_DARK,charSpacing:1,fontFace:ff})
+  s1.addText(`DATE · ${today}`,{x:0.375,y:4.953,w:5.05,h:0.118,fontSize:8,color:BG_DARK,fontFace:ff})
+  // Right panel
+  s1.addText('PORTFOLIO SNAPSHOT',{x:6.175,y:1.183,w:3.45,h:0.18,fontSize:8,color:TEAL,bold:true,charSpacing:1.5,fontFace:ff})
+  lbl(s1,'COMPANY',6.175,1.457)
+  s1.addText(m.company||'',{x:6.175,y:1.599,w:3.45,h:0.272,fontSize:15,bold:true,color:TXT_DARK,fontFace:ff,fit:'shrink'})
+  lbl(s1,'TAGLINE',6.175,1.96)
+  s1.addText(m.tagline||'',{x:6.175,y:2.103,w:3.57,h:0.168,fontSize:8,color:TXT_MED,fontFace:ff,fit:'shrink'})
+  lbl(s1,'SECTOR · STAGE · GEOGRAPHY',6.175,2.354)
+  s1.addText([m.sector,m.stage,m.geography].filter(Boolean).join(' · '),{x:6.175,y:2.497,w:3.45,h:0.174,fontSize:8,color:TXT_MED,fontFace:ff,fit:'shrink'})
+  lbl(s1,'RECOMMENDATION',6.175,2.742)
+  s1.addShape('RECTANGLE',{x:6.175,y:2.884,w:3.45,h:0.317,fill:{color:TEAL},line:{color:TEAL}})
+  s1.addText(recText,{x:6.175,y:2.884,w:3.45,h:0.317,fontSize:8,bold:true,color:TXT_DARK,align:'center',valign:'middle',fontFace:ff,fit:'shrink'})
+  s1.addShape('RECTANGLE',{x:6.179,y:3.346,w:3.442,h:1.092,fill:{color:BG_CREAM},line:{color:BG_MID,width:0.5}})
+  s1.addText('THESIS FIT',{x:6.323,y:3.475,w:3.153,h:0.113,fontSize:8,color:TXT_GREY,charSpacing:1.5,fontFace:ff})
+  s1.addText(`${score}/100`,{x:6.323,y:3.618,w:3.153,h:0.532,fontSize:36,bold:true,color:TXT_DARK,fontFace:'Courier New',align:'center'})
+  s1.addText(`CONFIDENCE: ${conf}`,{x:6.323,y:4.18,w:3.273,h:0.129,fontSize:8,color:TEAL_DIM,charSpacing:1,fontFace:ff})
+  ftr(s1,1,6)
+
+  // ── SLIDE 2: THESIS & SCORING ────────────────────────────────────
+  const s2=prs.addSlide(); s2.background={color:TXT_WHITE}; wm(s2)
   hdr(s2,'SECTION 01 / 05 · THESIS & SCORING','Investment Thesis & Scoring Breakdown')
-  ;[['RECOMMENDATION',m.recommendation||'—'],['ROUND',m.stage||'—'],['HOLD PERIOD','12 + 3 years']].forEach(([lbl,val],i)=>{
-    const x=0.3+i*4.37
-    s2.addText(lbl,{x,y:0.72,w:4.1,h:0.18,fontSize:6.5,color:GREY,charSpacing:1.5,fontFace:ff})
-    s2.addText(val,{x,y:0.92,w:4.1,h:0.3,fontSize:13,bold:true,color:WHITE,fontFace:ff,fit:'shrink'})
-    div(s2,x,1.28,4.1)
+  ;[['RECOMMENDATION',recText,0.555],['ROUND',m.stage||'—',3.635],['HOLD PERIOD','12 + 3 years',6.716]].forEach(([l,v,x])=>{
+    s2.addText(l,{x,y:1.383,w:2.729,h:0.159,fontSize:8,color:TXT_GREY,charSpacing:1.5,fontFace:ff})
+    s2.addText(v,{x,y:1.572,w:2.729,h:0.38,fontSize:10,bold:true,color:TXT_DARK,fontFace:ff,fit:'shrink'})
+    div(s2,x,1.962,2.729)
   })
-  s2.addText(m.recommendation_rationale||'',{x:0.3,y:1.35,w:12.7,h:0.45,fontSize:9.5,color:LGREY,fontFace:ff})
-  div(s2,0.3,1.85,12.7)
-  const dims=[
-    {key:'growth_momentum',label:'Growth Momentum',num:'01'},
-    {key:'impact_integrity',label:'Impact Integrity',num:'02'},
-    {key:'team_commitment',label:'Team Commitment',num:'03'},
-    {key:'business_model',label:'Business Model',num:'04'},
+  s2.addText(m.recommendation_rationale||'',{x:0.555,y:1.986,w:8.889,h:0.22,fontSize:7,color:TXT_MED,fontFace:ff,fit:'shrink'})
+  div(s2,0.375,2.82,9.25)
+  const dims2=[
+    {key:'growth_momentum',label:'Growth Momentum',num:'01',x:0.508,y:2.867},
+    {key:'impact_integrity',label:'Impact Integrity',num:'02',x:5.188,y:2.867},
+    {key:'team_commitment',label:'Team Commitment',num:'03',x:0.508,y:4.141},
+    {key:'business_model',label:'Business Model',num:'04',x:5.188,y:4.141},
   ]
-  dims.forEach((d,i)=>{
-    const row=Math.floor(i/2),col=i%2
-    const x=0.3+col*6.5,y=2.0+row*2.35
+  dims2.forEach(d=>{
     const b=m.scoring_breakdown?.[d.key]||{score:0,max:25,note:''}
     const pct=b.score/25
-    const sc=b.score>=18?'2D7A47':b.score>=12?'C9A84C':'E05252'
-    s2.addText(d.num,{x,y,w:0.45,h:0.35,fontSize:18,bold:true,color:GREEN,fontFace:'Courier New'})
-    s2.addText(d.label,{x:x+0.5,y:y+0.05,w:3.5,h:0.28,fontSize:11,bold:true,color:WHITE,fontFace:ff})
-    s2.addText(`${b.score}/25`,{x:x+5.0,y,w:1.3,h:0.35,fontSize:16,bold:true,color:sc,fontFace:'Courier New',align:'right'})
-    s2.addShape('RECTANGLE',{x,y:y+0.42,w:6.2,h:0.12,fill:{color:GREEN,transparency:81},line:{color:GREEN,transparency:81}})
-    if(pct>0)s2.addShape('RECTANGLE',{x,y:y+0.42,w:Math.max(0.05,6.2*pct),h:0.12,fill:{color:sc},line:{color:sc}})
-    s2.addText(b.note||'',{x,y:y+0.62,w:6.2,h:0.75,fontSize:9,color:GREY,fontFace:ff,valign:'top'})
-    if(row===0)div(s2,x,y+1.58,6.2)
+    const col=b.score>=18?TEAL:b.score>=12?'C9A84C':'E05252'
+    s2.addText(d.num,{x:d.x,y:d.y,w:0.211,h:0.172,fontSize:8,bold:true,color:TEAL_DIM,fontFace:ff})
+    s2.addText(d.label,{x:d.x+0.25,y:d.y+0.026,w:2.5,h:0.132,fontSize:8,bold:true,color:TXT_DARK,fontFace:ff})
+    s2.addText(`${b.score}/25`,{x:d.x,y:d.y+0.235,w:4.305,h:0.27,fontSize:18,bold:true,color:col,fontFace:'Courier New'})
+    s2.addShape('RECTANGLE',{x:d.x,y:d.y+0.52,w:4.305,h:0.06,fill:{color:BG_MID},line:{color:BG_MID}})
+    if(pct>0)s2.addShape('RECTANGLE',{x:d.x,y:d.y+0.52,w:Math.max(0.05,4.305*pct),h:0.06,fill:{color:col},line:{color:col}})
+    s2.addText(b.note||'',{x:d.x,y:d.y+0.62,w:4.305,h:0.42,fontSize:7,color:TXT_MED,fontFace:ff,valign:'top'})
+    if(d.num==='02')div(s2,0.375,4.09,9.25)
   })
-  pgn(s2,2,6)
+  ftr(s2,2,6)
 
-  // SLIDE 3 — Market & Moat
-  const s3=prs.addSlide(); s3.background={color:DARK}
+  // ── SLIDE 3: MARKET & MOAT ────────────────────────────────────────
+  const s3=prs.addSlide(); s3.background={color:TXT_WHITE}; wm(s3)
   hdr(s3,'SECTION 02 / 05 · MARKET & MOAT','Market Opportunity & Product Moat')
-  slbl(s3,'MARKET SIZE - ADDRESSABLE OPPORTUNITY',0.3,0.72)
-  ;['tam','sam','som'].forEach((k,i)=>{
-    const x=0.3+i*4.37
-    s3.addShape('RECTANGLE',{x,y:0.92,w:4.1,h:1.2,fill:{color:MID},line:{color:GREEN,width:0.5}})
-    s3.addText(k.toUpperCase(),{x,y:0.96,w:4.1,h:0.22,fontSize:7.5,bold:true,color:LITE,align:'center',charSpacing:2,fontFace:ff})
-    s3.addText(m.market?.[k]||'—',{x,y:1.2,w:4.1,h:0.5,fontSize:18,bold:true,color:WHITE,align:'center',fontFace:ff,fit:'shrink'})
+  slbl(s3,'MARKET SIZE - ADDRESSABLE OPPORTUNITY',0.375,1.234,9.25)
+  ;[['TAM',m.market?.tam||'—',0.508],['SAM',m.market?.sam||'—',3.628],['SOM',m.market?.som||'—',6.747]].forEach(([l,v,x])=>{
+    s3.addShape('RECTANGLE',{x,y:1.46,w:2.745,h:0.8,fill:{color:BG_CREAM},line:{color:BG_MID,width:0.5}})
+    s3.addText(l,{x:x+0.05,y:1.508,w:2.645,h:0.134,fontSize:8,bold:true,color:TEAL_DIM,charSpacing:2,fontFace:ff})
+    s3.addText(v,{x:x+0.05,y:1.672,w:2.645,h:0.223,fontSize:13,bold:true,color:TXT_DARK,fontFace:ff,fit:'shrink'})
   })
-  slbl(s3,'KEY REGULATORY TAILWIND',0.3,2.28)
-  s3.addShape('RECTANGLE',{x:0.3,y:2.48,w:12.7,h:0.55,fill:{color:MID},line:{color:GREEN,width:0.5}})
-  s3.addText(m.market?.key_tailwind||'',{x:0.4,y:2.52,w:12.5,h:0.47,fontSize:9.5,color:LGREY,fontFace:ff,fit:'shrink'})
-  ;[['PRODUCT',m.product?.what_it_does||''],['COMPETITIVE MOAT',m.product?.moat||''],['VS COMPETITORS',m.product?.vs_competitors||'']].forEach(([lbl,val],i)=>{
-    const x=0.3+i*4.37
-    slbl(s3,lbl,x,3.18)
-    div(s3,x,3.38,4.1)
-    s3.addText(val,{x,y:3.45,w:4.1,h:2.1,fontSize:9,color:GREY,fontFace:ff,valign:'top'})
+  div(s3,0.375,2.88,9.25)
+  ;[['KEY REGULATORY TAILWIND',m.market?.key_tailwind||'',0.508],['PRODUCT',m.product?.what_it_does||'',3.628],['COMPETITIVE MOAT',m.product?.moat||'',6.747]].forEach(([l,v,x])=>{
+    s3.addText(l,{x,y:2.945,w:2.745,h:0.144,fontSize:8,bold:true,color:TEAL_DIM,charSpacing:1.5,fontFace:ff})
+    div(s3,x,3.1,2.745)
+    s3.addText(v,{x,y:3.119,w:2.745,h:1.85,fontSize:7.5,color:TXT_MED,fontFace:ff,valign:'top'})
   })
-  pgn(s3,3,6)
+  ftr(s3,3,6)
 
-  // SLIDE 4 — Team & Comparables
-  const s4=prs.addSlide(); s4.background={color:DARK}
+  // ── SLIDE 4: TEAM & COMPARABLES ───────────────────────────────────
+  const s4=prs.addSlide(); s4.background={color:TXT_WHITE}; wm(s4)
   hdr(s4,'SECTION 03 / 05 · TEAM & COMPS','Team Assessment & Comparable Transactions')
-  slbl(s4,'TEAM ASSESSMENT',0.3,0.72)
-  div(s4,0.3,0.92,5.8)
-  s4.addText('FOUNDER–MARKET FIT',{x:0.3,y:1.0,w:3.5,h:0.18,fontSize:6.5,color:GREY,charSpacing:1.5,fontFace:ff})
-  const fmfc=(m.team?.founder_market_fit||'').toLowerCase()==='high'?'2D7A47':'C9A84C'
-  s4.addShape('RECTANGLE',{x:3.9,y:0.97,w:2.2,h:0.25,fill:{color:fmfc,transparency:88},line:{color:fmfc,width:0.5}})
-  s4.addText((m.team?.founder_market_fit||'HIGH').toUpperCase(),{x:3.9,y:0.97,w:2.2,h:0.25,fontSize:8.5,bold:true,color:fmfc,align:'center',valign:'middle',fontFace:ff})
-  s4.addText(m.team?.assessment||'',{x:0.3,y:1.32,w:5.8,h:1.8,fontSize:9.5,color:LGREY,fontFace:ff,valign:'top'})
-  slbl(s4,'GAPS & RECOMMENDED DD',0.3,3.22)
-  div(s4,0.3,3.42,5.8)
+  slbl(s4,'TEAM ASSESSMENT',0.375,1.234)
+  div(s4,0.375,1.366,4.562)
+  s4.addText('FOUNDER–MARKET FIT',{x:0.523,y:1.539,w:3.116,h:0.18,fontSize:8,color:TXT_GREY,charSpacing:1,fontFace:ff})
+  const fmfc=(m.team?.founder_market_fit||'').toLowerCase()==='high'?TEAL:'C9A84C'
+  s4.addShape('RECTANGLE',{x:3.655,y:1.523,w:1.134,h:0.148,fill:{color:fmfc},line:{color:fmfc}})
+  s4.addText((m.team?.founder_market_fit||'HIGH').toUpperCase(),{x:3.655,y:1.523,w:1.134,h:0.148,fontSize:8,bold:true,color:TXT_WHITE,align:'center',valign:'middle',fontFace:ff})
+  s4.addText(m.team?.assessment||'',{x:0.523,y:1.734,w:4.266,h:0.65,fontSize:8,color:TXT_MED,fontFace:ff,valign:'top'})
+  s4.addText('GAPS & RECOMMENDED DD',{x:0.523,y:2.43,w:4.266,h:0.15,fontSize:8,color:TEAL_DIM,bold:true,charSpacing:1.5,fontFace:ff})
+  div(s4,0.523,2.585,4.266)
   ;(m.team?.key_gaps||'').split(/[.;]/).filter(g=>g.trim()).slice(0,4).forEach((gap,i)=>{
-    s4.addText(`${i+1}.`,{x:0.3,y:3.5+i*0.55,w:0.3,h:0.45,fontSize:9,bold:true,color:LITE,fontFace:'Courier New'})
-    s4.addText(gap.trim(),{x:0.65,y:3.5+i*0.55,w:5.45,h:0.45,fontSize:9,color:GREY,fontFace:ff})
+    s4.addShape('OVAL',{x:0.617,y:2.616+i*0.19,w:0.07,h:0.07,fill:{color:TEAL_DIM},line:{color:TEAL_DIM}})
+    s4.addText(gap.trim(),{x:0.71,y:2.609+i*0.19,w:4.069,h:0.174,fontSize:7.5,color:TXT_MED,fontFace:ff})
   })
-  slbl(s4,'COMPARABLE TRANSACTIONS',6.4,0.72)
-  div(s4,6.4,0.92,6.6)
+  s4.addShape('LINE',{x:5.062,y:1.234,w:0,h:4.1,line:{color:BG_MID,width:0.5}})
+  slbl(s4,'COMPARABLE TRANSACTIONS',5.062,1.234)
+  div(s4,5.062,1.366,4.562)
+  const cpPos=[{x:5.18,y:1.492},{x:7.5,y:1.492},{x:5.18,y:3.43},{x:7.5,y:3.43}]
   ;(m.comparables||[]).slice(0,4).forEach((c,i)=>{
-    const row=Math.floor(i/2),col=i%2
-    const x=6.4+col*3.35,y=1.0+row*2.85
-    s4.addText(`COMP ${String(i+1).padStart(2,'0')}`,{x,y,w:3.2,h:0.18,fontSize:6.5,bold:true,color:LITE,charSpacing:1.5,fontFace:ff})
-    s4.addText(c.company||'',{x,y:y+0.22,w:3.2,h:0.28,fontSize:13,bold:true,color:WHITE,fontFace:ff,fit:'shrink'})
-    s4.addText(c.round||'',{x,y:y+0.54,w:3.2,h:0.2,fontSize:8.5,color:GOLD,fontFace:ff})
-    s4.addText(c.relevance||'',{x,y:y+0.78,w:3.2,h:1.0,fontSize:8.5,color:GREY,fontFace:ff,valign:'top'})
-    div(s4,x,y+1.88,3.1)
+    const p=cpPos[i]
+    s4.addText(`COMP ${String(i+1).padStart(2,'0')}`,{x:p.x,y:p.y,w:2.008,h:0.107,fontSize:8,bold:true,color:TEAL_DIM,charSpacing:1.5,fontFace:ff})
+    s4.addText(c.company||'',{x:p.x,y:p.y+0.137,w:2.008,h:0.123,fontSize:8,bold:true,color:TXT_DARK,fontFace:ff,fit:'shrink'})
+    s4.addText(c.round||'',{x:p.x,y:p.y+0.29,w:2.128,h:0.14,fontSize:6,color:TEAL_DIM,fontFace:ff})
+    s4.addText(c.relevance||'',{x:p.x,y:p.y+0.46,w:2.008,h:0.85,fontSize:7,color:TXT_MED,fontFace:ff,valign:'top'})
   })
-  pgn(s4,4,6)
+  div(s4,5.062,3.38,4.562)
+  ftr(s4,4,6)
 
-  // SLIDE 5 — IC Prep
-  const s5=prs.addSlide(); s5.background={color:DARK}
-  hdr(s5,'SECTION 04 / 05 · RED FLAGS & QUESTIONS','IC Prep — Red Flags & Partner Questions')
-  slbl(s5,'RED FLAGS — DEAL KILLERS',0.3,0.72)
-  div(s5,0.3,0.92,6.0)
+  // ── SLIDE 5: IC PREP ─────────────────────────────────────────────
+  const s5=prs.addSlide(); s5.background={color:TXT_WHITE}; wm(s5)
+  hdr(s5,'SECTION 04 / 05 · RED FLAGS & QUESTIONS','Red Flags & Partner Questions')
+  slbl(s5,'RED FLAGS - DEAL KILLERS',0.375,1.234)
+  div(s5,0.375,1.366,4.562)
+  const rfY=[1.461,2.426,3.391,4.355]
   ;(m.red_flags||[]).slice(0,4).forEach((flag,i)=>{
-    const y=1.02+i*1.48
-    s5.addShape('RECTANGLE',{x:0.3,y,w:0.4,h:0.4,fill:{color:'E05252',transparency:85},line:{color:'E05252',width:0.8}})
-    s5.addText('!',{x:0.3,y,w:0.4,h:0.4,fontSize:14,bold:true,color:'E05252',align:'center',valign:'middle',fontFace:ff})
-    s5.addText(`RED FLAG ${String(i+1).padStart(2,'0')}`,{x:0.8,y,w:5.5,h:0.18,fontSize:6.5,bold:true,color:'E05252',charSpacing:1.5,fontFace:ff})
-    s5.addText(flag,{x:0.8,y:y+0.22,w:5.5,h:1.1,fontSize:9,color:LGREY,fontFace:ff,valign:'top'})
+    const y=rfY[i]
+    s5.addText(`RED FLAG ${String(i+1).padStart(2,'0')}`,{x:4.238,y,w:0.633,h:0.18,fontSize:6,color:'E05252',bold:true,charSpacing:1,fontFace:ff})
+    s5.addShape('RECTANGLE',{x:0.492,y:y+0.039,w:0.18,h:0.14,fill:{color:'E05252'},line:{color:'E05252'}})
+    s5.addText('!',{x:0.492,y:y+0.039,w:0.18,h:0.14,fontSize:8,bold:true,color:TXT_WHITE,align:'center',valign:'middle',fontFace:ff})
+    s5.addText(flag,{x:0.711,y,w:3.491,h:0.85,fontSize:7.5,color:TXT_DARK,fontFace:ff,valign:'top'})
+    if(i<3)div(s5,0.375,y+0.9,4.562)
   })
-  slbl(s5,'QUESTIONS — ALEXANDRE DERREUMAUX (IC PARTNER)',6.6,0.72)
-  div(s5,6.6,0.92,6.4)
+  s5.addShape('LINE',{x:5.062,y:1.234,w:0,h:4.1,line:{color:BG_MID,width:0.5}})
+  slbl(s5,'QUESTIONS - ALEXANDRE DERREUMAUX (IC PARTNER)',5.062,1.234)
+  div(s5,5.062,1.366,4.562)
+  const qY=[1.5,2.465,3.43,4.395]
   ;(m.partner_questions||[]).slice(0,4).forEach((q,i)=>{
-    const y=1.02+i*1.48
-    s5.addShape('RECTANGLE',{x:6.6,y,w:0.42,h:0.42,fill:{color:LITE,transparency:88},line:{color:LITE,width:0.5}})
-    s5.addText(`Q${i+1}`,{x:6.6,y,w:0.42,h:0.42,fontSize:12,bold:true,color:LITE,align:'center',valign:'middle',fontFace:'Courier New'})
-    s5.addText(q,{x:7.12,y,w:5.88,h:1.35,fontSize:9,color:LGREY,fontFace:ff,valign:'top'})
+    const y=qY[i]
+    s5.addShape('RECTANGLE',{x:5.18,y,w:0.242,h:0.203,fill:{color:TEAL},line:{color:TEAL}})
+    s5.addText(`Q${i+1}`,{x:5.18,y,w:0.242,h:0.203,fontSize:8,bold:true,color:TXT_WHITE,align:'center',valign:'middle',fontFace:ff})
+    s5.addText(q,{x:5.461,y,w:4.047,h:0.85,fontSize:7.5,color:TXT_DARK,fontFace:ff,valign:'top'})
+    if(i<3)div(s5,5.062,y+0.9,4.562)
   })
-  s5.addShape('RECTANGLE',{x:0.3,y:6.95,w:12.7,h:0.3,fill:{color:MID},line:{color:GREEN,width:0.5}})
-  s5.addText('🤖  AI ANALYSIS APPENDIX  ·  AI-generated: research, scoring, red flags, questions  ·  Human judgment required: IC decision, valuation, board strategy, Article 9 sign-off',{x:0.4,y:6.97,w:12.5,h:0.26,fontSize:7,color:GREY,fontFace:ff})
-  pgn(s5,5,6)
+  s5.addShape('RECTANGLE',{x:0,y:5.28,w:10,h:0.12,fill:{color:BG_MID},line:{color:BG_MID}})
+  s5.addText('🤖 AI APPENDIX · AI-generated: research, scoring, red flags, questions · Human required: IC decision, valuation, board strategy, Article 9 sign-off',{x:0.375,y:5.285,w:9.25,h:0.11,fontSize:5.5,color:TXT_GREY,fontFace:ff})
+  ftr(s5,5,6)
 
-  // SLIDE 6 — Decision
-  const s6=prs.addSlide(); s6.background={color:DARK}
+  // ── SLIDE 6: DECISION ────────────────────────────────────────────
+  const s6=prs.addSlide(); s6.background={color:TXT_WHITE}; wm(s6)
   hdr(s6,'SECTION 05 / 05 · DECISION','Investment Decision')
-  s6.addShape('RECTANGLE',{x:0.3,y:0.72,w:12.7,h:1.55,fill:{color:recCol,transparency:92},line:{color:recCol,width:1.5}})
-  s6.addText('RECOMMENDATION',{x:0.5,y:0.82,w:3,h:0.2,fontSize:7,bold:true,color:recCol,charSpacing:2,fontFace:ff})
-  s6.addText(m.recommendation||'INVEST',{x:0.5,y:1.02,w:3.5,h:0.55,fontSize:20,bold:true,color:recCol,fontFace:ff,charSpacing:2,fit:'shrink'})
-  s6.addText(`${score}/100  ·  ${(m.confidence_level||'MEDIUM').toUpperCase()} CONFIDENCE`,{x:4.2,y:0.85,w:8.5,h:0.25,fontSize:9,color:recCol,fontFace:ff})
-  s6.addText(m.recommendation_rationale||'',{x:4.2,y:1.12,w:8.5,h:0.95,fontSize:9.5,color:WHITE,fontFace:ff,valign:'top'})
-  slbl(s6,'POWER LAW CASE — WHY THIS IS THE CATEGORY WINNER',0.3,2.45)
-  div(s6,0.3,2.65,6.0)
-  const pwLines=(m.power_law_case||'').split('. ').filter(Boolean).slice(0,3)
-  pwLines.forEach((line,i)=>{
-    s6.addText(String(i+1),{x:0.3,y:2.75+i*1.12,w:0.32,h:0.32,fontSize:11,bold:true,color:LITE,fontFace:'Courier New'})
-    s6.addText(line.trim(),{x:0.7,y:2.75+i*1.12,w:5.7,h:0.95,fontSize:9.5,color:LGREY,fontFace:ff,valign:'top'})
+  s6.addShape('RECTANGLE',{x:0.375,y:1.55,w:9.25,h:0.63,fill:{color:TEAL},line:{color:TEAL}})
+  s6.addText('RECOMMENDATION',{x:0.562,y:1.56,w:6,h:0.15,fontSize:8,bold:true,color:BG_DARK,charSpacing:1.5,fontFace:ff})
+  s6.addText(recText,{x:0.562,y:1.71,w:5.5,h:0.26,fontSize:11,bold:true,color:BG_DARK,fontFace:ff,fit:'shrink'})
+  s6.addText('THESIS FIT',{x:8.756,y:1.56,w:0.9,h:0.113,fontSize:6,color:BG_DARK,charSpacing:1,fontFace:ff})
+  s6.addText(`${score}/100`,{x:8.031,y:1.68,w:1.594,h:0.338,fontSize:22,bold:true,color:BG_DARK,fontFace:'Courier New'})
+  s6.addText(m.recommendation_rationale||'',{x:0.562,y:2.24,w:9.069,h:0.36,fontSize:8,color:TXT_MED,fontFace:ff,valign:'top'})
+  div(s6,0.375,2.8,9.25)
+  slbl(s6,'POWER LAW CASE — WHY THIS IS THE CATEGORY WINNER',0.375,2.844)
+  div(s6,0.375,2.976,4.57)
+  const pwY=[3.125,3.973,4.82]
+  ;(m.power_law_case||'').split('. ').filter(Boolean).slice(0,3).forEach((line,i)=>{
+    s6.addText(String(i+1),{x:0.508,y:pwY[i],w:0.211,h:0.172,fontSize:8,bold:true,color:TEAL_DIM,fontFace:ff})
+    s6.addText(line.trim(),{x:0.758,y:pwY[i],w:4.055,h:0.78,fontSize:8,color:TXT_MED,fontFace:ff,valign:'top'})
+    if(i<2)div(s6,0.375,pwY[i]+0.81,4.57)
   })
-  slbl(s6,'DILIGENCE QUESTIONS',6.6,2.45)
-  div(s6,6.6,2.65,6.4)
+  s6.addShape('LINE',{x:5.055,y:2.844,w:0,h:2.5,line:{color:BG_MID,width:0.5}})
+  slbl(s6,'DILIGENCE QUESTIONS',5.055,2.844)
+  div(s6,5.055,2.976,4.57)
+  const dqY=[3.117,3.823,4.529]
   ;(m.diligence_questions||[]).slice(0,3).forEach((q,i)=>{
-    s6.addShape('RECTANGLE',{x:6.6,y:2.75+i*1.45,w:0.38,h:0.38,fill:{color:LITE,transparency:88},line:{color:LITE,width:0.5}})
-    s6.addText(`Q${i+1}`,{x:6.6,y:2.75+i*1.45,w:0.38,h:0.38,fontSize:11,bold:true,color:LITE,align:'center',valign:'middle',fontFace:'Courier New'})
-    s6.addText(q,{x:7.08,y:2.75+i*1.45,w:5.92,h:1.3,fontSize:9,color:LGREY,fontFace:ff,valign:'top'})
+    s6.addText(`Q${i+1}`,{x:5.188,y:dqY[i],w:4.305,h:0.113,fontSize:8,bold:true,color:TEAL_DIM,fontFace:ff})
+    s6.addText(q,{x:5.188,y:dqY[i]+0.143,w:4.305,h:0.55,fontSize:7,color:TXT_MED,fontFace:ff,valign:'top'})
+    if(i<2)div(s6,5.055,dqY[i]+0.71,4.57)
   })
-  s6.addShape('RECTANGLE',{x:0.3,y:6.6,w:12.7,h:0.62,fill:{color:MID},line:{color:GREEN,width:0.5}})
-  slbl(s6,'IMPACT SUMMARY',0.5,6.65)
-  s6.addText(m.impact?.impact_note||m.impact?.co2_avoided||'Article 9 SFDR · GREENFIN Certified · tCO2eq impact measured quarterly',{x:0.5,y:6.83,w:12.3,h:0.32,fontSize:8.5,color:LGREY,fontFace:ff})
-  pgn(s6,6,6)
+  ftr(s6,6,6)
 
-  prs.writeFile({ fileName: `${(m.company||'Company').replace(/\s+/g,'_')}_GIGF_IC_Memo.pptx` })
+  prs.writeFile({fileName:`${(m.company||'Company').replace(/\s+/g,'_')}_GIGF_IC_Memo.pptx`})
 }
 
 

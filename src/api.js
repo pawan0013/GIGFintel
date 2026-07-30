@@ -39,10 +39,10 @@ INVEST (70+): all 4 mandatory criteria met, strong sector fit, measurable impact
 
 export const MEMO_SYSTEM = `You are a senior investment analyst at Meridiam GIGF (Green Impact Growth Fund). ${THESIS}
 
-Generate a rigorous IC-ready investment memo for a growth equity fund. Be precise about impact metrics.
-For portfolio companies already listed, note "PORTFOLIO COMPANY - Already invested" in recommendation_rationale.
+Generate a rigorous IC-ready investment memo. Be precise. Include global perspective — how do global trends, competition, regulation and innovation shape this company's future beyond Europe?
+For portfolio companies already listed, note "PORTFOLIO COMPANY - Already Invested" in recommendation_rationale.
 Output ONLY valid compact JSON — no markdown, no prose:
-{"company":"","tagline":"","stage":"","geography":"","sector":"","thesis_fit_score":75,"confidence_level":"Medium","confidence_note":"","recommendation":"INVEST","recommendation_rationale":"","executive_summary":"","scoring_breakdown":{"growth_momentum":{"score":20,"max":25,"note":""},"impact_integrity":{"score":18,"max":25,"note":""},"team_commitment":{"score":20,"max":25,"note":""},"business_model":{"score":17,"max":25,"note":""}},"mandatory_criteria":{"fast_growing":{"pass":true,"note":""},"strong_model":{"pass":true,"note":""},"solid_team":{"pass":true,"note":""},"ecological_impact":{"pass":true,"note":""}},"impact":{"co2_avoided":"","sdg_alignment":[],"article9_compliant":true,"impact_note":"","greenfin_eligible":true},"market":{"tam":"","sam":"","som":"","key_tailwind":""},"product":{"what_it_does":"","moat":"","vs_competitors":""},"team":{"assessment":"","founder_market_fit":"High","equity_commitment":"High","key_gaps":""},"risks":[{"description":"","severity":"High","mitigant":""}],"red_flags":[""],"challenges":[{"challenge":"","timeline":"6-12 months","impact":"High"}],"partner_questions":["","","","",""],"comparables":[{"company":"","round":"","relevance":""}],"portfolio_adjacency":"","diligence_questions":["","",""],"return_scenarios":{"base":"","bull":"","bear":""},"ai_analysis_note":"","pass_rationale":""}`
+{"company":"","tagline":"","stage":"","geography":"","sector":"","thesis_fit_score":75,"confidence_level":"Medium","recommendation":"INVEST","recommendation_rationale":"","scoring_breakdown":{"growth_momentum":{"score":20,"max":25,"note":""},"impact_integrity":{"score":18,"max":25,"note":""},"team_commitment":{"score":20,"max":25,"note":""},"business_model":{"score":17,"max":25,"note":""}},"mandatory_criteria":{"fast_growing":{"pass":true,"note":""},"strong_model":{"pass":true,"note":""},"solid_team":{"pass":true,"note":""},"ecological_impact":{"pass":true,"note":""}},"impact":{"co2_avoided":"","sdg_alignment":[],"article9_compliant":true,"impact_note":"","greenfin_eligible":true},"market":{"tam":"","sam":"","som":"","key_tailwind":""},"product":{"what_it_does":"","moat":"","vs_competitors":""},"global_perspective":{"tailwinds":"","threats":"","opportunity":""},"team":{"assessment":"","founder_market_fit":"High","equity_commitment":"High","key_gaps":""},"red_flags":["","","",""],"partner_questions":["","","","",""],"comparables":[{"company":"","round":"","relevance":""},{"company":"","round":"","relevance":""},{"company":"","round":"","relevance":""},{"company":"","round":"","relevance":""}],"diligence_questions":["","","","",""],"power_law_case":"","return_scenarios":{"base":"","bull":"","bear":""},"ai_analysis_note":""}`
 
 export const NEWS_SYSTEM = `Senior analyst at Meridiam GIGF. ${THESIS}
 Return ONLY a raw JSON array starting with [ ending with ]. No other text. Max 6 items:
@@ -135,7 +135,7 @@ export async function tavily(query, apiKey) {
   try {
     const r = await fetch("https://api.tavily.com/search", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ api_key: apiKey, query, search_depth: "basic", max_results: 5, include_answer: true }),
+      body: JSON.stringify({ api_key: apiKey, query, search_depth: "advanced", max_results: 6, include_answer: true }),
     })
     if (!r.ok) return null
     return r.json()
@@ -145,19 +145,22 @@ export async function tavily(query, apiKey) {
 export async function enrichCompany(companyName, tvKey) {
   if (!tvKey || !companyName) return ""
   const queries = [
-    `${companyName} founders CEO CTO background ecological transition expertise`,
-    `${companyName} revenue growth ARR funding metrics 2024 2025 2026`,
-    `${companyName} competitors clean energy EV circular economy market`,
-    `${companyName} CO2 impact sustainability Article 9 SFDR GREENFIN environmental`,
-    `${companyName} customers clients B2B enterprise contracts European market`,
+    `${companyName} CEO founder team background LinkedIn 2024 2025`,
+    `${companyName} revenue ARR funding round valuation 2024 2025 2026`,
+    `${companyName} competitors market landscape Europe 2025 2026`,
+    `${companyName} CO2 impact ESG sustainability GREENFIN Article 9 SFDR`,
+    `${companyName} customers enterprise contracts partnerships B2B`,
+    `${companyName} technology product how it works innovation`,
+    `${companyName} news recent developments expansion 2025 2026`,
+    `"${companyName}" site:crunchbase.com OR site:linkedin.com OR site:techcrunch.com`,
   ]
   const results = await Promise.allSettled(queries.map(q => tavily(q, tvKey)))
-  const sections = ["FOUNDER & TEAM INTEL","GROWTH & FINANCIALS","COMPETITIVE LANDSCAPE","IMPACT & SUSTAINABILITY","CUSTOMER BASE"]
+  const sections = ["FOUNDERS & TEAM","FINANCIALS & FUNDING","COMPETITIVE LANDSCAPE","IMPACT & SUSTAINABILITY","CUSTOMERS & PARTNERSHIPS","TECHNOLOGY & PRODUCT","RECENT NEWS","EXTERNAL PROFILES"]
   let context = ""
   results.forEach((r, i) => {
     if (r.status === "fulfilled" && r.value?.results?.length > 0) {
       context += `\n\n[${sections[i]}]\n`
-      context += r.value.results.slice(0,3).map(x => `${x.title}: ${(x.content||"").slice(0,200)}`).join("\n")
+      context += r.value.results.slice(0,4).map(x => `${x.title}: ${(x.content||"").slice(0,300)}`).join("\n")
       if (r.value.answer) context += `\nSummary: ${r.value.answer}`
     }
   })

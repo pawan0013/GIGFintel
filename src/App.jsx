@@ -5,21 +5,13 @@ import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 
 export default function App() {
-  const [user, setUser]         = useState(null)
-  const [loading, setLoading]   = useState(true)
-  const [deals, setDeals]       = useState([])
+  const [user, setUser]             = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [deals, setDeals]           = useState([])
   const [gmailToken, setGmailToken] = useState(null)
-
-  // Load from localStorage first, fall back to env vars (baked in at build time)
-  const [apiKey, setApiKey] = useState(() =>
-    localStorage.getItem('gigf-api-key') ||
-    (typeof import.meta !== 'undefined' ? import.meta.env?.VITE_ANTHROPIC_KEY : '') || ''
-  )
-  const [tvKey, setTvKey] = useState(() =>
-    localStorage.getItem('gigf-tv-key') ||
-    (typeof import.meta !== 'undefined' ? import.meta.env?.VITE_TAVILY_KEY : '') || ''
-  )
-  const [slackHook, setSlackHook] = useState(() => localStorage.getItem('gigf-slack-hook') || '')
+  const [apiKey, setApiKey]     = useState(() => localStorage.getItem('gigf-api-key') || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ANTHROPIC_KEY) || '' || import.meta.env.VITE_ANTHROPIC_KEY || '')
+  const [tvKey, setTvKey]       = useState(() => localStorage.getItem('gigf-tv-key') || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TAVILY_KEY) || ''  || import.meta.env.VITE_TAVILY_KEY   || '')
+  const [slackHook, setSlackHook] = useState(() => localStorage.getItem('gigf-slack-hook') || '' || '')
 
   const refreshDeals = useCallback(async (uid) => {
     if (!uid) return
@@ -41,7 +33,7 @@ export default function App() {
     <div className="min-h-screen bg-navy flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-2 border-gold border-t-transparent rounded-full animate-spin"/>
-        <p className="text-gold font-mono text-xs tracking-[0.3em] uppercase">Initializing GIGF Intel</p>
+        <p className="text-gold font-mono text-xs tracking-[0.3em] uppercase">Initializing</p>
       </div>
     </div>
   )

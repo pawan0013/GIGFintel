@@ -23,13 +23,8 @@ export default function Login() {
           <p className="text-white/50 text-sm">Green Impact Growth Fund · AI Intelligence Platform</p>
         </div>
         <div className="bg-navy-2 border border-white/10 rounded-2xl p-8">
-          <div className="space-y-3 mb-8">
-            {['Impact screener calibrated to GIGF thesis & 4 criteria','Article 9 SFDR + tCO2eq scoring on every deal','IC memo with AI vs human judgment appendix','EU ecological transition radar — 8 live sources','Portfolio monitoring: Chargepoly, iwell, Oxand + more'].map(f => (
-              <div key={f} className="flex items-center gap-3 text-sm text-white/60">
-                <div className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"/>
-                <span>{f}</span>
-              </div>
-            ))}
+          <div className="mb-8">
+            <p className="text-white/50 text-sm text-center leading-relaxed">Article 9 SFDR · EUR 220M · GREENFIN Certified<br/>Ecological transition deal intelligence for Meridiam GIGF</p>
           </div>
           <button onClick={handleLogin} disabled={loading}
             className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 rounded-xl py-3.5 px-6 font-semibold text-sm hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-wait">

@@ -52,7 +52,7 @@ Format: 1) Market theme today 2) Portfolio flag (if any urgent) 3) Top deal oppo
   // Step 4: Post to Slack if webhook set
   if (slackHook && brief && !brief.startsWith("Briefing error")) {
     onStep("Posting to Slack…")
-    const slackMsg = `⚡ *GIGF Intel — Morning Briefing ${new Date().toLocaleDateString("en-GB")}*\n\n${brief}\n\n_Automated by GIGF Intel v2_`
+    const slackMsg = `⚡ *GIGF Intelligence — Morning Briefing ${new Date().toLocaleDateString("en-GB")}*\n\n${brief}\n\n_Automated by GIGF Intelligence_`
     await fetch(slackHook, {
       method: "POST",
       body: JSON.stringify({ text: slackMsg }),
@@ -138,7 +138,7 @@ export default function LoginDashboard({ user, apiKey, tvKey, slackHook, deals =
             <h1 className="text-2xl font-bold text-white">{greeting()}, {safeName}.</h1>
             <span className="font-mono text-gold text-xl font-bold">{clock}</span>
           </div>
-          <p className="text-white/40 text-sm">{todayLabel()} · GIGF Intel v2</p>
+          <p className="text-white/40 text-sm">{todayLabel()} · GIGF Intelligence</p>
         </div>
         {user?.photoURL && (
           <img src={user.photoURL} alt="" className="w-10 h-10 rounded-full border border-white/10 flex-shrink-0"/>
@@ -185,7 +185,7 @@ export default function LoginDashboard({ user, apiKey, tvKey, slackHook, deals =
         {!briefing && !briefLoading && (
           <div className="text-center py-6">
             <p className="text-white/30 text-sm mb-1">5 parallel agents: Portfolio pulse · Deal flow · Pipeline · Slack alert · AI synthesis</p>
-            <p className="text-white/20 text-xs">Replaces your Monday morning newsletter research</p>
+            <p className="text-white/20 text-xs">Replaces your EU cleantech ecosystem monitoring</p>
           </div>
         )}
 

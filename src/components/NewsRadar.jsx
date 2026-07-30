@@ -95,7 +95,7 @@ Max 6 items. Headlines:
     const email = prompt('Send Monday digest to email:')
     if (!email || !items.length) return
     const top5 = items.filter(i=>i.score>=60).slice(0,5)
-    const body = `Meridiam GIGF Weekly Digest\\n\\n${top5.map((i,n)=>`${n+1}. ${i.headline}\\nRelevance: ${i.score}/100 — ${i.why}\\nAction: ${i.action}\\n`).join('\\n')}`
+    const body = `GIGF Tech Weekly Digest\\n\\n${top5.map((i,n)=>`${n+1}. ${i.headline}\\nRelevance: ${i.score}/100 — ${i.why}\\nAction: ${i.action}\\n`).join('\\n')}`
     const subject = `GIGF Intel — Weekly Digest ${new Date().toLocaleDateString()}`
     if (typeof emailjs !== 'undefined') {
       // If EmailJS is configured
@@ -118,14 +118,14 @@ Max 6 items. Headlines:
     <div>
       <div className="mb-5">
         <Label>News Radar</Label>
-        <h2 className="text-xl font-bold text-white mt-1">EU FinTech Intelligence Feed</h2>
-        <p className="text-white/40 text-sm mt-0.5">Scans 8 EU FinTech deal sources. Each headline scored against GIGF thesis. Replaces Monday newsletter research.</p>
+        <h2 className="text-xl font-bold text-white mt-1">EU Cleantech Intelligence Feed</h2>
+        <p className="text-white/40 text-sm mt-0.5">Scans 8 EU cleantech sources. Each headline scored against GIGF ecological transition thesis.</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
         <Button onClick={fetchNews} loading={loading} className="flex-none">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          {loading ? 'Scanning sources...' : 'Scan EU FinTech News'}
+          {loading ? 'Scanning sources...' : 'Scan EU Cleantech News'}
         </Button>
         {rawText && !loading && (
           <Button variant="secondary" onClick={()=>scoreHeadlines(rawText)} loading={scoring} className="flex-none">Re-score</Button>
@@ -149,7 +149,7 @@ Max 6 items. Headlines:
         </div>
       )}
 
-      {!loading && !scoring && items.length === 0 && <Empty title="Click Scan EU FinTech News to fetch latest deals" subtitle="Requires Tavily API key. Scans 8 sources including Sifted, Fintech Global, TechCrunch EU" icon="📡"/>}
+      {!loading && !scoring && items.length === 0 && <Empty title="Click Scan EU Cleantech News to fetch latest deals" subtitle="Requires Tavily API key. Scans 8 sources including Sifted, Fintech Global, TechCrunch EU" icon="📡"/>}
       {scoring && <div className="flex items-center gap-3 py-8 justify-center"><Spinner/><p className="text-white/40 text-sm">Scoring against GIGF thesis...</p></div>}
 
       <div className="space-y-2">

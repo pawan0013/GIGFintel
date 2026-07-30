@@ -12,8 +12,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center p-6"
-      style={{background:'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(74,158,107,0.08), transparent), #0a1f0f'}}>
+    <div className="min-h-screen bg-navy flex items-center justify-center p-6" style={{background:'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,160,80,0.08), transparent), #08122a'}}>
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-navy-2 border border-white/10 rounded-full px-4 py-1.5 mb-6">
@@ -25,13 +24,7 @@ export default function Login() {
         </div>
         <div className="bg-navy-2 border border-white/10 rounded-2xl p-8">
           <div className="space-y-3 mb-8">
-            {[
-              'Impact screener calibrated to GIGF thesis & 4 criteria',
-              'Article 9 SFDR + tCO2eq scoring on every deal',
-              'IC memo with AI vs human judgment appendix',
-              'EU ecological transition radar — 8 live sources',
-              'Portfolio monitoring: Chargepoly, iwell, Oxand + more',
-            ].map(f => (
+            {['Impact screener calibrated to GIGF thesis & 4 criteria','Article 9 SFDR + tCO2eq scoring on every deal','IC memo with AI vs human judgment appendix','EU ecological transition radar — 8 live sources','Portfolio monitoring: Chargepoly, iwell, Oxand + more'].map(f => (
               <div key={f} className="flex items-center gap-3 text-sm text-white/60">
                 <div className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0"/>
                 <span>{f}</span>
@@ -48,7 +41,7 @@ export default function Login() {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
             )}
-            {loading ? 'Signing in…' : 'Continue with Google'}
+            {loading ? 'Signing in...' : 'Continue with Google'}
           </button>
           {error && <p className="mt-3 text-red-400 text-xs text-center">{error}</p>}
           <p className="mt-4 text-xs text-white/30 text-center">Your data is private and stored only under your account.</p>

@@ -67,7 +67,7 @@ export default function MemoPresent({ memo: m, onClose }) {
         <div className="flex items-center justify-between mb-4">
           <div className="font-mono text-[10px] text-white/30">{idx+1} / {slides.length}</div>
           <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-gold">{slides[idx].title}</h3>
-          <div className="font-mono text-[10px] text-white/30">BlackFin Intel</div>
+          <div className="font-mono text-[10px] text-white/30">GIGF Intelligence</div>
         </div>
         <div className="min-h-[350px]">{slides[idx].content}</div>
         <div className="flex items-center justify-center gap-4 mt-6">

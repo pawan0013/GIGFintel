@@ -49,7 +49,7 @@ export default function Operations({ apiKey = '', tvKey = '', slackHook = '', on
   const status = [
     { label: 'Claude API',    active: !!apiKey,   desc: 'Screener, Inbox, Calendar, Assistant, Intel' },
     { label: 'Tavily Search', active: !!tvKey,     desc: 'Radar news feed, Intel Engine deal alerts' },
-    { label: 'Slack Alerts',  active: !!slackHook, desc: 'Notifies #bf-signals on high-score deals' },
+    { label: 'Slack Alerts',  active: !!slackHook, desc: 'Notifies #gigf-signals on high-score deals' },
     { label: 'Firebase Auth', active: true,        desc: 'Google OAuth — always active' },
     { label: 'Firestore',     active: true,        desc: 'Deal pipeline storage — always active' },
     { label: 'Gmail API',     active: true,        desc: 'Connect in Inbox tab' },
@@ -83,7 +83,7 @@ export default function Operations({ apiKey = '', tvKey = '', slackHook = '', on
         <div className="bg-navy-3 border border-white/8 rounded-xl p-4 space-y-2">
           <p className="text-[9px] font-bold tracking-[0.15em] uppercase text-white/30">Setup (2 min)</p>
           {['1. Go to api.slack.com/apps → Create App → Incoming Webhooks',
-            '2. Activate → Add to Workspace → Choose #bf-signals channel',
+            '2. Activate → Add to Workspace → Choose #gigf-signals channel',
             '3. Copy the Webhook URL and paste below'].map(s => (
             <p key={s} className="text-xs text-white/50">{s}</p>
           ))}

@@ -42,7 +42,7 @@ export default function PortcoAI({ apiKey, tvKey }) {
     try {
       const raw = await claudeAPI(PORTCO_SYSTEM,
         `Analyze ${portco.name} (${portco.sector}, ${portco.stage}).
-Context: GIGF portfolio company. Alexandre is on the board.
+Context: GIGF portfolio company. Alexandre Derreumaux is on the board.
 Generate the complete AI opportunity analysis JSON.`, apiKey)
 
       const clean = raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim()
